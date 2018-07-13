@@ -1,28 +1,28 @@
-# PoC for the Farnborough Airshow
+# Getting Started with Hyperledger Fabric Demo
 
-### You will need to run through the following
+## You will need to run through the following
 
 ## Build
 
 ### start off in root folder
 
-yarn install
+    yarn install
 
-cd fabric-scripts/build
+    cd fabric-scripts/build
 
-./startBuild.sh (answer y to the docker cache question)
+    ./startBuild.sh (answer y to the docker cache question)
 
-node enrollAdmin
+    node enrollAdmin
 
-node registerUser
+    node registerUser
 
 ### Back to Root Folder
 
-cd ../../
+    cd ../../
 
 ## Run App
 
-node app
+    node app
 
     http://localhost:3000
 
@@ -90,7 +90,7 @@ Unique Key is made up of: **Serial Number, Part Number and Manufacturer Name**.
 
 ## Upgrade Chaincode
 
-## After updating the chaincode program `fabric-scripts/chaincode/fabcar/node/fabcar.js`
+### After updating the chaincode program `fabric-scripts/chaincode/fabcar/node/fabcar.js`
 
 ### Upgrade (increment version number)
 
