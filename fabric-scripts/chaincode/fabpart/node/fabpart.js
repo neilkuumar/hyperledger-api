@@ -8,16 +8,24 @@
 const shim = require('fabric-shim');
 
 let Chaincode = class {
-	// The Init method is called when the Smart Contract 'fabpart' is instantiated by the blockchain network
-	// Best practice is to have any Ledger initialization in separate function -- see initLedger()
+	/**
+	 * The Init method is called when the Smart Contract 'fabpart' is instantiated by the blockchain network
+	 * Best practice is to have any Ledger initialization in separate function -- see initLedger()
+	 * @param  {stub} stub
+	 * @return {shim} success
+	 */
 	async Init(stub) {
 		console.info('=========== Instantiated fabpart chaincode ===========');
 		return shim.success();
 	}
 
-	// The Invoke method is called as a result of an application request to run the Smart Contract
-	// 'fabpart'. The calling application program has also specified the particular smart contract
-	// function to be called, with arguments
+	/**
+	 * The Invoke method is called as a result of an application request to run the Smart Contract
+	 * 'fabpart'. The calling application program has also specified the particular smart contract
+	 * function to be called, with arguments
+	 * @param  {stub} stub
+	 * @return {shim} success/fail
+	 */
 	async Invoke(stub) {
 		let ret = stub.getFunctionAndParameters();
 		console.info(ret);
@@ -25,7 +33,9 @@ let Chaincode = class {
 		let method = this[ret.fcn];
 		if (!method) {
 			console.error('no function of name:' + ret.fcn + ' found');
-			throw new Error('Received unknown function ' + ret.fcn + ' invocation');
+			throw new Error(
+				'Received unknown function ' + ret.fcn + ' invocation'
+			);
 		}
 		try {
 			let payload = await method(stub, ret.params);
@@ -36,21 +46,11 @@ let Chaincode = class {
 		}
 	}
 
-	async queryPart(stub, args) {
-		if (args.length != 1) {
-			throw new Error('Incorrect number of arguments. Expecting PartNumber ex: PART01');
-		}
-		let partNumber = args[0];
-
-		let partAsBytes = await stub.getState(partNumber); // get the part from chaincode state
-		if (!partAsBytes || partAsBytes.toString().length <= 0) {
-			throw new Error(partNumber + ' does not exist: ');
-		}
-		console.log(partAsBytes.toString());
-		return partAsBytes;
-	}
-
-	async initLedger(stub, args) {
+	/**
+	 * Initialises the ledger and populates with data
+	 * @param  {stub} stub
+	 */
+	async initLedger(stub) {
 		console.info('============= START : Initialize Ledger ===========');
 		let parts = [];
 
@@ -332,17 +332,40 @@ let Chaincode = class {
 
 		for (let i = 0; i < parts.length; i++) {
 			parts[i].docType = 'part';
-			let key = await stub.createCompositeKey('manufacturerName~partNumber~serialNumber', [
-				parts[i].manufacturerName,
-				parts[i].partNumber,
-				parts[i].serialNumber
-			]);
+			let key = await stub.createCompositeKey(
+				'manufacturerName~partNumber~serialNumber',
+				[
+					parts[i].manufacturerName,
+					parts[i].partNumber,
+					parts[i].serialNumber
+				]
+			);
 			await stub.putState(key, Buffer.from(JSON.stringify(parts[i])));
 			console.info('Added <--> ', parts[i]);
 		}
 		console.info('============= END : Initialize Ledger ===========');
 	}
-
+	/**
+	 * @param  {stub} stub
+	 * @param  {Array} args expected docType: 'part',
+	 						serialNumber: args[0],
+	 						partNumber: args[1],
+							manufacturerName: args[2],
+							cageCode: args[3],
+							faaApprovalCode: args[4],
+							description: args[5],
+							revision: args[6],
+							drawingNumber: args[7],
+							quantity: args[8],
+							uom: args[9],
+							batchNumber: args[10],
+							grDate: args[11],
+							status: args[12],
+							owner: args[13],
+							location: args[14],
+							parentPart: args[15],
+							prePart: args[16]
+	 */
 	async createPart(stub, args) {
 		console.info('============= START : Create Part ===========');
 		if (args.length != 17) {
@@ -370,92 +393,29 @@ let Chaincode = class {
 			prePart: args[16]
 		};
 
-		let key = await stub.createCompositeKey('manufacturerName~partNumber~serialNumber', [
-			args[2],
-			args[1],
-			args[0]
-		]);
+		let key = await stub.createCompositeKey(
+			'manufacturerName~partNumber~serialNumber',
+			[args[2], args[1], args[0]]
+		);
 
 		await stub.putState(key, Buffer.from(JSON.stringify(part)));
 		console.info('============= END : Create Part ==========');
 	}
 
-	async queryAllParts(stub, args) {
-		let startKey = 'PART0';
-		let endKey = 'PART999';
-
-		let iterator = await stub.getStateByRange(startKey, endKey);
-
-		let allResults = [];
-		while (true) {
-			let res = await iterator.next();
-
-			if (res.value && res.value.value.toString()) {
-				let jsonRes = {};
-				console.log(res.value.value.toString('utf8'));
-
-				jsonRes.Key = res.value.key;
-				try {
-					jsonRes.Record = JSON.parse(res.value.value.toString('utf8'));
-				} catch (err) {
-					console.log(err);
-					jsonRes.Record = res.value.value.toString('utf8');
-				}
-				allResults.push(jsonRes);
-			}
-			if (res.done) {
-				console.log('end of data');
-				await iterator.close();
-				console.info(allResults);
-				return Buffer.from(JSON.stringify(allResults));
-			}
-		}
-	}
-
-	async changePartOwnerAndStatus(stub, args) {
-		console.info('============= START : changePartOwnerAndStatus ===========');
-
-		let key = stub.createCompositeKey('manufacturerName~partNumber~serialNumber', [args[2], args[1], args[0]]);
-
-		try {
-			let partAsBytes = await stub.getState(key);
-			let part = JSON.parse(partAsBytes);
-			part.owner = args[3];
-			part.status = args[4];
-			await stub.putState(key, Buffer.from(JSON.stringify(part)));
-		} catch (err) {
-			throw new Error(err);
-		}
-
-		console.info('============= END : changePartOwnerAndStatus ===========');
-	}
-
-	async restorePartBackToDemoStatus(stub, args) {
-		console.info('============= START : changePartOwnerAndStatus ===========');
-
-		let key = stub.createCompositeKey('manufacturerName~partNumber~serialNumber', [args[2], args[1], args[0]]);
-
-		try {
-			let partAsBytes = await stub.getState(key);
-			let part = JSON.parse(partAsBytes);
-			part.owner = args[3];
-			part.status = args[4];
-			part.prePart = '';
-			await stub.putState(key, Buffer.from(JSON.stringify(part)));
-		} catch (err) {
-			throw new Error(err);
-		}
-
-		console.info('============= END : changePartOwnerAndStatus ===========');
-	}
-
+	/**
+	 * @param  {stub} stub
+	 * @param  {Array} args
+	 */
 	async changePartOwner(stub, args) {
 		console.info('============= START : changePartOwner ===========');
 		if (args.length != 4) {
 			throw new Error('Incorrect number of arguments. Expecting 4');
 		}
 
-		let key = stub.createCompositeKey('manufacturerName~partNumber~serialNumber', [args[2], args[1], args[0]]);
+		let key = stub.createCompositeKey(
+			'manufacturerName~partNumber~serialNumber',
+			[args[2], args[1], args[0]]
+		);
 
 		try {
 			let partAsBytes = await stub.getState(key);
@@ -467,69 +427,11 @@ let Chaincode = class {
 		}
 		console.info('============= END : changePartOwner ===========');
 	}
-
-	async changePartStatus(stub, args) {
-		console.info('============= START : changePartStatus ===========');
-		if (args.length != 4) {
-			throw new Error('Incorrect number of arguments. Expecting 4');
-		}
-
-		let key = await stub.createCompositeKey('manufacturerName~partNumber~serialNumber', [
-			args[2],
-			args[1],
-			args[0]
-		]);
-
-		try {
-			let partAsBytes = await stub.getState(key);
-			let part = JSON.parse(partAsBytes);
-			part.status = args[3];
-			await stub.putState(key, Buffer.from(JSON.stringify(part)));
-		} catch (err) {
-			throw new Error(err);
-		}
-		console.info('============= END : changePartStatus ===========');
-	}
-
-	async returnAllParts(stub, args) {
-		console.info('============= START : returnallparts ===========');
-		if (args.length != 1) {
-			throw new Error('Incorrect number of arguments. Expecting 1');
-		}
-
-		let query = args[0];
-		console.log('query: ' + query);
-
-		let iterator = await stub.getQueryResult(query);
-
-		let allResults = [];
-		while (true) {
-			let res = await iterator.next();
-
-			if (res.value && res.value.value.toString()) {
-				let jsonRes = {};
-				console.log(res.value.value.toString('utf8'));
-
-				jsonRes.Key = res.value.key;
-				try {
-					jsonRes.Record = JSON.parse(res.value.value.toString('utf8'));
-				} catch (err) {
-					console.log(err);
-					jsonRes.Record = res.value.value.toString('utf8');
-				}
-				allResults.push(jsonRes);
-			}
-			if (res.done) {
-				console.log('end of data');
-				await iterator.close();
-				console.info(allResults);
-				return Buffer.from(JSON.stringify(allResults));
-			}
-		}
-
-		console.info('============= END : returnallparts ===========');
-	}
-
+	/**
+	 * @param  {stub} stub
+	 * @param  {Array} args parts with key
+	 * @return {Array} part(s)
+	 */
 	async queryByKey(stub, args) {
 		console.info('============= START : returnallparts ===========');
 		if (args.length != 3) {
@@ -544,7 +446,10 @@ let Chaincode = class {
 			}
 		});
 
-		let iterator = await stub.getStateByPartialCompositeKey('manufacturerName~partNumber~serialNumber', key);
+		let iterator = await stub.getStateByPartialCompositeKey(
+			'manufacturerName~partNumber~serialNumber',
+			key
+		);
 
 		let allResults = [];
 		while (true) {
@@ -556,7 +461,9 @@ let Chaincode = class {
 
 				jsonRes.Key = res.value.key;
 				try {
-					jsonRes.Record = JSON.parse(res.value.value.toString('utf8'));
+					jsonRes.Record = JSON.parse(
+						res.value.value.toString('utf8')
+					);
 				} catch (err) {
 					console.log(err);
 					jsonRes.Record = res.value.value.toString('utf8');
@@ -574,47 +481,13 @@ let Chaincode = class {
 		console.info('============= END : returnallparts ===========');
 	}
 
-	async queryBySerial(stub, args) {
-		console.info('============= START : returnallparts ===========');
-
-		const query = {
-			selector: {
-				serialNumber: args[0]
-			}
-		};
-
-		let iterator = await stub.getQueryResult(JSON.stringify(query));
-
-		let allResults = [];
-		while (true) {
-			let res = await iterator.next();
-
-			if (res.value && res.value.value.toString()) {
-				let jsonRes = {};
-				console.log(res.value.value.toString('utf8'));
-
-				jsonRes.Key = res.value.key;
-				try {
-					jsonRes.Record = JSON.parse(res.value.value.toString('utf8'));
-				} catch (err) {
-					console.log(err);
-					jsonRes.Record = res.value.value.toString('utf8');
-				}
-				allResults.push(jsonRes);
-			}
-			if (res.done) {
-				console.log('end of data');
-				await iterator.close();
-				console.info(allResults);
-				return Buffer.from(JSON.stringify(allResults));
-			}
-		}
-
-		console.info('============= END : returnallparts ===========');
-	}
-
+	/**
+	 * @param  {stub} stub
+	 * @param  {Array} args
+	 * @return {Array} parts belonging to owner
+	 */
 	async queryByOwner(stub, args) {
-		console.info('============= START : returnallparts ===========');
+		console.info('============= START : queryByOwner ===========');
 
 		const query = {
 			selector: {
@@ -634,7 +507,9 @@ let Chaincode = class {
 
 				jsonRes.Key = res.value.key;
 				try {
-					jsonRes.Record = JSON.parse(res.value.value.toString('utf8'));
+					jsonRes.Record = JSON.parse(
+						res.value.value.toString('utf8')
+					);
 				} catch (err) {
 					console.log(err);
 					jsonRes.Record = res.value.value.toString('utf8');
@@ -649,58 +524,23 @@ let Chaincode = class {
 			}
 		}
 
-		console.info('============= END : returnallparts ===========');
+		console.info('============= END : queryByOwner ===========');
 	}
-
-	async queryByDescription(stub, args) {
-		console.info('============= START : queryByDescription ===========');
-
-		let regexString = '/^.*\b(' + args[0] + ')\b.*$/gi';
-		const query = {
-			selector: {
-				description: {
-					$regex: regexString
-				}
-			}
-		};
-
-		let iterator = await stub.getQueryResult(JSON.stringify(query));
-
-		let allResults = [];
-		while (true) {
-			let res = await iterator.next();
-
-			if (res.value && res.value.value.toString()) {
-				let jsonRes = {};
-				console.log(res.value.value.toString('utf8'));
-
-				jsonRes.Key = res.value.key;
-				try {
-					jsonRes.Record = JSON.parse(res.value.value.toString('utf8'));
-				} catch (err) {
-					console.log(err);
-					jsonRes.Record = res.value.value.toString('utf8');
-				}
-				allResults.push(jsonRes);
-			}
-			if (res.done) {
-				console.log('end of data');
-				await iterator.close();
-				console.info(allResults);
-				return Buffer.from(JSON.stringify(allResults));
-			}
-		}
-
-		console.info('============= END : queryByDescription ===========');
-	}
-
+	/**
+	 * @param  {stub} stub
+	 * @param  {Array} args [serialNumber, partNumber, manufacturerName]
+	 * @return {Array} part history
+	 */
 	async historyByKey(stub, args) {
-		console.info('============= START : returnallparts ===========');
+		console.info('============= START : historyByKey ===========');
 		if (args.length != 3) {
 			throw new Error('Incorrect number of arguments. Expecting 2');
 		}
 
-		let key = stub.createCompositeKey('manufacturerName~partNumber~serialNumber', [args[2], args[1], args[0]]);
+		let key = stub.createCompositeKey(
+			'manufacturerName~partNumber~serialNumber',
+			[args[2], args[1], args[0]]
+		);
 
 		let iterator = await stub.getHistoryForKey(key);
 
@@ -716,7 +556,9 @@ let Chaincode = class {
 				jsonRes.Timestamp = res.value.timestamp;
 				jsonRes.Key = res.value.key;
 				try {
-					jsonRes.Record = JSON.parse(res.value.value.toString('utf8'));
+					jsonRes.Record = JSON.parse(
+						res.value.value.toString('utf8')
+					);
 				} catch (err) {
 					console.log(err);
 					jsonRes.Record = res.value.value.toString('utf8');
@@ -731,7 +573,7 @@ let Chaincode = class {
 			}
 		}
 
-		console.info('============= END : returnallparts ===========');
+		console.info('============= END : historyByKey ===========');
 	}
 };
 

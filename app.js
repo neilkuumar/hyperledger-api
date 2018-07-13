@@ -3,7 +3,6 @@ const write = require('./write.js');
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
-const WebSocket = require('ws');
 
 app.use(bodyParser.json());
 
@@ -21,6 +20,9 @@ app.get('/', (req, res) => {
 	res.send('Blockchain Network is up and running! v1');
 });
 
+/**
+ * get parts for a specific manufacturer
+ */
 app.get('/getParts', (req, res) => {
 	let sManufacturerKey =
 		typeof req.query.manufacturerName === 'undefined'
@@ -50,6 +52,9 @@ app.get('/getParts', (req, res) => {
 	}
 });
 
+/**
+ * get parts by owner
+ */
 app.get('/getPartsByOwner', (req, res) => {
 	let owner = typeof req.query.owner === 'undefined' ? '' : req.query.owner;
 	if (owner !== '') {
@@ -69,21 +74,17 @@ app.get('/getPartsByOwner', (req, res) => {
 	}
 });
 
-app.post('/part', async (req, res) => {
-	const b = req.body;
-	const part = [b.manufacturerName, b.partNumber, b.serialNumber];
-	try {
-		let response = await query.queryPart(part);
-		console.log(response);
-		res.send(JSON.parse(response));
-	} catch (err) {
-		res.send(err);
-	}
-});
-
+/**
+ * get all the history for the part
+ */
 app.post('/history', async (req, res) => {
 	const b = req.body;
-	const part = [b.serialNumber, b.partNumber, b.manufacturerName];
+	let part = [];
+	// ignore case
+	part.push(getParameterCaseInsensitive(b, 'serialNumber'));
+	part.push(getParameterCaseInsensitive(b, 'partNumber'));
+	part.push(getParameterCaseInsensitive(b, 'manufacturerName'));
+
 	try {
 		let response = await query.historyByKey(part);
 		console.log(response);
@@ -93,11 +94,14 @@ app.post('/history', async (req, res) => {
 	}
 });
 
+/**
+ * Create new part
+ */
 app.post('/create', async (req, res) => {
 	const b = req.body;
 	let part = [];
 
-	// S4 doesn't know what case it will be sent back in
+	// ignore case
 	part.push(getParameterCaseInsensitive(b, 'serialNumber'));
 	part.push(getParameterCaseInsensitive(b, 'partNumber'));
 	part.push(getParameterCaseInsensitive(b, 'manufacturerName'));
@@ -125,70 +129,6 @@ app.post('/create', async (req, res) => {
 	}
 });
 
-app.post('/changeOwner', async (req, res) => {
-	const body = req.body;
-	const newPartData = returnArgs(body);
-	try {
-		let writeRequest = await write.writeToLedger(
-			newPartData,
-			'changePartOwner'
-		);
-		console.log(writeRequest);
-		res.send('done');
-	} catch (err) {
-		res.send(err);
-	}
-});
-
-app.post('/changeStatus', async (req, res) => {
-	const b = req.body;
-	const part = [b.serialNumber, b.partNumber, b.manufacturerName, b.status];
-	try {
-		let writeRequest = await write.writeToLedger(part, 'changePartStatus');
-		console.log(writeRequest);
-		websocketUpdate();
-		res.send('done');
-	} catch (err) {
-		res.send(err);
-	}
-});
-
-app.get('/checkSerial', async (req, res) => {
-	let serial =
-		typeof req.query.serialNumber === 'undefined'
-			? ''
-			: req.query.serialNumber;
-	if (serial !== '') {
-		try {
-			let response = await query.queryBySerial(serial);
-			console.log(response);
-			res.send(JSON.parse(response));
-		} catch (err) {
-			res.send(err);
-		}
-	} else {
-		res.send('Please enter a serial number. E.g. checkSerial?serialNumber');
-	}
-});
-
-app.get('/search', async (req, res) => {
-	let description =
-		typeof req.query.description === 'undefined'
-			? ''
-			: req.query.description;
-	if (description !== '') {
-		try {
-			let response = await query.queryByDescription(description);
-			console.log(response);
-			res.send(JSON.parse(response));
-		} catch (err) {
-			res.send(err);
-		}
-	} else {
-		res.send('Please enter a description. E.g. search?description=');
-	}
-});
-
 app.post('/changeStatusOwner', async (req, res) => {
 	const body = req.body;
 	const newPartData = returnArgs(body);
@@ -204,52 +144,7 @@ app.post('/changeStatusOwner', async (req, res) => {
 	}
 });
 
-app.post('/restorePartBackForDemo', async (req, res) => {
-	const body = req.body;
-	const newPartData = returnArgs(body);
-	try {
-		let writeRequest = await write.writeToLedger(
-			newPartData,
-			'restorePartBackToDemoStatus'
-		);
-		console.log(writeRequest);
-		res.send('done');
-	} catch (err) {
-		res.send(err);
-	}
-});
-
 app.listen(3000, () => console.log('Blockchain listening on port 3000!'));
-
-/**
- * @param  {object} oData object posted to api
- * @return {Array} array of values
- */
-function returnArgs(oData) {
-	return Object.values(oData);
-}
-/**
- * Triggers an update on the websocket network
- */
-function websocketUpdate() {
-	try {
-		const url =
-			'ws://ec2-18-130-8-136.eu-west-2.compute.amazonaws.com:8080';
-		// const url = 'ws://localhost:8080';
-		// Create WebSocket connection.
-		const socket = new WebSocket(url);
-		// Connection opened
-		socket.addEventListener('open', function(event) {
-			setTimeout(() => {
-				socket.send('Hello Server!');
-			}, 3000);
-
-			// socket.close();
-		});
-	} catch (err) {
-		console.log(err);
-	}
-}
 
 /**
  * @param {Object} object

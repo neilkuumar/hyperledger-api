@@ -57,119 +57,6 @@ FabricClient.newDefaultKeyValueStore({
 	});
 
 module.exports = {
-	queryAllParts: function() {
-		return new Promise((resolve, reject) => {
-			// queryCar chaincode function - requires 1 argument, ex: args: ['CAR4'],
-			// queryAllCars chaincode function - requires no arguments , ex: args: [''],
-			const request = {
-				// targets : --- letting this default to the peers assigned to the channel
-				chaincodeId: 'fabpart',
-				fcn: 'queryAllParts',
-				args: ['']
-			};
-
-			// request = {
-			// 	//targets : --- letting this default to the peers assigned to the channel
-			// 	chaincodeId: 'fabpart',
-			// 	fcn: 'queryPart',
-			// 	args: ['PART0']
-			// };
-
-			// send the query proposal to the peer
-			channel
-				.queryByChaincode(request)
-				.then(queryResponses => {
-					console.log('Query has completed, checking results');
-					// query_responses could have more than one  results if there multiple peers were used as targets
-					if (queryResponses && queryResponses.length == 1) {
-						if (queryResponses[0] instanceof Error) {
-							console.error('error from query = ', queryResponses[0]);
-						} else {
-							console.log('Response is ', queryResponses[0].toString());
-							resolve(queryResponses[0].toString());
-						}
-					} else {
-						console.log('No payloads were returned from query');
-					}
-				})
-				.catch(err => {
-					reject();
-					console.error('Failed to query successfully :: ' + err);
-				});
-		});
-	},
-	queryPart: function(partData) {
-		return new Promise((resolve, reject) => {
-			// queryCar chaincode function - requires 1 argument, ex: args: ['CAR4'],
-			// queryAllCars chaincode function - requires no arguments , ex: args: [''],
-			const request = {
-				// targets : --- letting this default to the peers assigned to the channel
-				chaincodeId: 'fabpart',
-				fcn: 'queryByKey',
-				args: partData
-			};
-
-			// send the query proposal to the peer
-			channel
-				.queryByChaincode(request)
-				.then(queryResponses => {
-					console.log('Query has completed, checking results');
-					// query_responses could have more than one  results if there multiple peers were used as targets
-					if (queryResponses && queryResponses.length == 1) {
-						if (queryResponses[0] instanceof Error) {
-							console.error('error from query = ', queryResponses[0]);
-						} else {
-							console.log('Response is ', queryResponses[0].toString());
-							resolve(queryResponses[0].toString());
-						}
-					} else {
-						console.log('No payloads were returned from query');
-					}
-				})
-				.catch(err => {
-					reject();
-					console.error('Failed to query successfully :: ' + err);
-				});
-		});
-	},
-	returnAllParts: function() {
-		return new Promise((resolve, reject) => {
-			const query = {
-				selector: {
-					docType: 'part'
-				}
-			};
-
-			const request = {
-				// targets : --- letting this default to the peers assigned to the channel
-				chaincodeId: 'fabpart',
-				fcn: 'returnAllParts',
-				args: [query]
-			};
-
-			// send the query proposal to the peer
-			channel
-				.queryByChaincode(request)
-				.then(queryResponses => {
-					console.log('Query has completed, checking results');
-					// query_responses could have more than one  results if there multiple peers were used as targets
-					if (queryResponses && queryResponses.length == 1) {
-						if (queryResponses[0] instanceof Error) {
-							console.error('error from query = ', queryResponses[0]);
-						} else {
-							console.log('Response is ', queryResponses[0].toString());
-							resolve(queryResponses[0].toString());
-						}
-					} else {
-						console.log('No payloads were returned from query');
-					}
-				})
-				.catch(err => {
-					reject();
-					console.error('Failed to query successfully :: ' + err);
-				});
-		});
-	},
 	queryByKey: function(partKey) {
 		return new Promise((resolve, reject) => {
 			const request = {
@@ -187,9 +74,15 @@ module.exports = {
 					// query_responses could have more than one  results if there multiple peers were used as targets
 					if (queryResponses && queryResponses.length == 1) {
 						if (queryResponses[0] instanceof Error) {
-							console.error('error from query = ', queryResponses[0]);
+							console.error(
+								'error from query = ',
+								queryResponses[0]
+							);
 						} else {
-							console.log('Response is ', queryResponses[0].toString());
+							console.log(
+								'Response is ',
+								queryResponses[0].toString()
+							);
 							resolve(queryResponses[0].toString());
 						}
 					} else {
@@ -219,41 +112,15 @@ module.exports = {
 					// query_responses could have more than one  results if there multiple peers were used as targets
 					if (queryResponses && queryResponses.length == 1) {
 						if (queryResponses[0] instanceof Error) {
-							console.error('error from query = ', queryResponses[0]);
+							console.error(
+								'error from query = ',
+								queryResponses[0]
+							);
 						} else {
-							console.log('Response is ', queryResponses[0].toString());
-							resolve(queryResponses[0].toString());
-						}
-					} else {
-						console.log('No payloads were returned from query');
-					}
-				})
-				.catch(err => {
-					reject();
-					console.error('Failed to query successfully :: ' + err);
-				});
-		});
-	},
-	queryBySerial: function(serial) {
-		return new Promise((resolve, reject) => {
-			const request = {
-				// targets : --- letting this default to the peers assigned to the channel
-				chaincodeId: 'fabpart',
-				fcn: 'queryBySerial',
-				args: [serial]
-			};
-
-			// send the query proposal to the peer
-			channel
-				.queryByChaincode(request)
-				.then(queryResponses => {
-					console.log('Query has completed, checking results');
-					// query_responses could have more than one  results if there multiple peers were used as targets
-					if (queryResponses && queryResponses.length == 1) {
-						if (queryResponses[0] instanceof Error) {
-							console.error('error from query = ', queryResponses[0]);
-						} else {
-							console.log('Response is ', queryResponses[0].toString());
+							console.log(
+								'Response is ',
+								queryResponses[0].toString()
+							);
 							resolve(queryResponses[0].toString());
 						}
 					} else {
@@ -283,41 +150,15 @@ module.exports = {
 					// query_responses could have more than one  results if there multiple peers were used as targets
 					if (queryResponses && queryResponses.length == 1) {
 						if (queryResponses[0] instanceof Error) {
-							console.error('error from query = ', queryResponses[0]);
+							console.error(
+								'error from query = ',
+								queryResponses[0]
+							);
 						} else {
-							console.log('Response is ', queryResponses[0].toString());
-							resolve(queryResponses[0].toString());
-						}
-					} else {
-						console.log('No payloads were returned from query');
-					}
-				})
-				.catch(err => {
-					reject();
-					console.error('Failed to query successfully :: ' + err);
-				});
-		});
-	},
-	queryByDescription: function(description) {
-		return new Promise((resolve, reject) => {
-			const request = {
-				// targets : --- letting this default to the peers assigned to the channel
-				chaincodeId: 'fabpart',
-				fcn: 'queryByDescription',
-				args: [description]
-			};
-
-			// send the query proposal to the peer
-			channel
-				.queryByChaincode(request)
-				.then(queryResponses => {
-					console.log('Query has completed, checking results');
-					// query_responses could have more than one  results if there multiple peers were used as targets
-					if (queryResponses && queryResponses.length == 1) {
-						if (queryResponses[0] instanceof Error) {
-							console.error('error from query = ', queryResponses[0]);
-						} else {
-							console.log('Response is ', queryResponses[0].toString());
+							console.log(
+								'Response is ',
+								queryResponses[0].toString()
+							);
 							resolve(queryResponses[0].toString());
 						}
 					} else {
@@ -367,9 +208,15 @@ module.exports = {
 					// query_responses could have more than one  results if there multiple peers were used as targets
 					if (queryResponses && queryResponses.length == 1) {
 						if (queryResponses[0] instanceof Error) {
-							console.error('error from query = ', queryResponses[0]);
+							console.error(
+								'error from query = ',
+								queryResponses[0]
+							);
 						} else {
-							console.log('Response is ', queryResponses[0].toString());
+							console.log(
+								'Response is ',
+								queryResponses[0].toString()
+							);
 							resolve(queryResponses[0].toString());
 						}
 					} else {
