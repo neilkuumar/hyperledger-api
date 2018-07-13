@@ -1,0 +1,16 @@
+{
+  "extends": "google",
+  "parserOptions": {
+    "ecmaVersion": 2017
+  },
+  "plugins": ["prettier"],
+  "rules": {
+    "prettier/prettier": "error",
+    "no-tabs":"off",
+    "indent": ["error", "tab", {"SwitchCase": 1}],
+    "arrow-parens": "off",
+    "quotes": "off",
+    "comma-dangle":"off",
+    "object-curly-spacing":"off"
+  }
+}
