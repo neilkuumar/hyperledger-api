@@ -1,6 +1,13 @@
 # Getting Started with Hyperledger Fabric Demo
 
-## You will need to run through the following
+## You will need to run through the following:
+
+## Prerequisites
+
+* Docker
+* Node
+* Yarn
+
 
 ## Build
 
@@ -10,11 +17,12 @@
 
     cd fabric-scripts/build
 
-    ./startBuild.sh (answer y to the docker cache question)
+    ./startBuild.sh 
 
-    node enrollAdmin
+**Answer y to the docker cache question**
 
-    node registerUser
+**If you are running this on a smaller server and the build fails, change the timeout param in the startBuild.sh script to something much bigger (e.g. 100) and try again**
+
 
 ### Back to Root Folder
 

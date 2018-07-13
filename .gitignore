@@ -14,7 +14,7 @@
 # fabric sdk node modules
 node_modules/
 package-lock.json
-./fabric-scripts/build/hfc-key-store/*
+fabric-scripts/build/hfc-key-store/*
 .vscode
 .vscode/launch.json
 .vscode/launch.json
