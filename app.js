@@ -20,22 +20,22 @@ app.get('/', (req, res) => {
 	res.send('Blockchain Network is up and running! v1');
 });
 
+// Routes
 /**
- * get parts for a specific manufacturer
+ * get parts for a specific manufacturer (or partial composite key)
  */
 app.get('/getParts', (req, res) => {
-	let sManufacturerKey =
-		typeof req.query.manufacturerName === 'undefined'
-			? ''
-			: req.query.manufacturerName;
-	let sSerialKey =
-		typeof req.query.serialNo === 'undefined' ? '' : req.query.serialNo;
-	let sPartKey =
-		typeof req.query.partNo === 'undefined' ? '' : req.query.partNo;
-	const partKey = [sSerialKey, sPartKey, sManufacturerKey];
-	if (partKey.length !== 0) {
+	const b = req.body;
+	let compositeKey = [];
+
+	// ignore case
+	compositeKey.push(getParameterCaseInsensitive(b, 'serialNumber'));
+	compositeKey.push(getParameterCaseInsensitive(b, 'partNumber'));
+	compositeKey.push(getParameterCaseInsensitive(b, 'manufacturerName'));
+
+	if (compositeKey.length !== 0) {
 		query
-			.queryByKey(partKey)
+			.queryByKey(compositeKey)
 			.then(response => {
 				const responseJson = {
 					parts: JSON.parse(response)
@@ -129,13 +129,16 @@ app.post('/create', async (req, res) => {
 	}
 });
 
-app.post('/changeStatusOwner', async (req, res) => {
+/**
+ * Create part owner
+ */
+app.post('/changeOwner', async (req, res) => {
 	const body = req.body;
 	const newPartData = returnArgs(body);
 	try {
 		let writeRequest = await write.writeToLedger(
 			newPartData,
-			'changePartOwnerAndStatus'
+			'changePartOwner'
 		);
 		console.log(writeRequest);
 		res.send('done');
