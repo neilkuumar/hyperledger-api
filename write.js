@@ -66,7 +66,7 @@ module.exports.writeToLedger = async function(aData, sFcn) {
 			// must send the proposal to endorsing peers
 			let request = {
 				// targets: let default to the peer assigned to the client
-				chaincodeId: 'fabcar',
+				chaincodeId: 'fabpart',
 				fcn: sFcn,
 				args: aData,
 				chainId: 'mychannel',

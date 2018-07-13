@@ -90,14 +90,14 @@ Unique Key is made up of: **Serial Number, Part Number and Manufacturer Name**.
 
 ## Upgrade Chaincode
 
-### After updating the chaincode program `fabric-scripts/chaincode/fabcar/node/fabcar.js`
+### After updating the chaincode program `fabric-scripts/chaincode/fabpart/node/fabpart.js`
 
 ### Upgrade (increment version number)
 
 ### Install
 
-    docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode install -n fabcar -v 1.1 -p /opt/gopath/src/github.com/fabcar/node -l node
+    docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode install -n fabpart -v 1.1 -p /opt/gopath/src/github.com/fabpart/node -l node
 
 ### Then Upgrade
 
-    docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode upgrade -o orderer.example.com:7050 -C mychannel -n fabcar -l node -v 1.1 -c '{"Args":[""]}' -P "OR ('Org1MSP.member','Org2MSP.member')"
+    docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode upgrade -o orderer.example.com:7050 -C mychannel -n fabpart -l node -v 1.1 -c '{"Args":[""]}' -P "OR ('Org1MSP.member','Org2MSP.member')"

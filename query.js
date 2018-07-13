@@ -63,14 +63,14 @@ module.exports = {
 			// queryAllCars chaincode function - requires no arguments , ex: args: [''],
 			const request = {
 				// targets : --- letting this default to the peers assigned to the channel
-				chaincodeId: 'fabcar',
+				chaincodeId: 'fabpart',
 				fcn: 'queryAllParts',
 				args: ['']
 			};
 
 			// request = {
 			// 	//targets : --- letting this default to the peers assigned to the channel
-			// 	chaincodeId: 'fabcar',
+			// 	chaincodeId: 'fabpart',
 			// 	fcn: 'queryPart',
 			// 	args: ['PART0']
 			// };
@@ -104,7 +104,7 @@ module.exports = {
 			// queryAllCars chaincode function - requires no arguments , ex: args: [''],
 			const request = {
 				// targets : --- letting this default to the peers assigned to the channel
-				chaincodeId: 'fabcar',
+				chaincodeId: 'fabpart',
 				fcn: 'queryByKey',
 				args: partData
 			};
@@ -142,7 +142,7 @@ module.exports = {
 
 			const request = {
 				// targets : --- letting this default to the peers assigned to the channel
-				chaincodeId: 'fabcar',
+				chaincodeId: 'fabpart',
 				fcn: 'returnAllParts',
 				args: [query]
 			};
@@ -174,7 +174,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			const request = {
 				// targets : --- letting this default to the peers assigned to the channel
-				chaincodeId: 'fabcar',
+				chaincodeId: 'fabpart',
 				fcn: 'queryByKey',
 				args: partKey
 			};
@@ -206,7 +206,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			const request = {
 				// targets : --- letting this default to the peers assigned to the channel
-				chaincodeId: 'fabcar',
+				chaincodeId: 'fabpart',
 				fcn: 'historyByKey',
 				args: partKey
 			};
@@ -238,7 +238,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			const request = {
 				// targets : --- letting this default to the peers assigned to the channel
-				chaincodeId: 'fabcar',
+				chaincodeId: 'fabpart',
 				fcn: 'queryBySerial',
 				args: [serial]
 			};
@@ -270,7 +270,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			const request = {
 				// targets : --- letting this default to the peers assigned to the channel
-				chaincodeId: 'fabcar',
+				chaincodeId: 'fabpart',
 				fcn: 'queryByOwner',
 				args: [owner]
 			};
@@ -302,7 +302,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			const request = {
 				// targets : --- letting this default to the peers assigned to the channel
-				chaincodeId: 'fabcar',
+				chaincodeId: 'fabpart',
 				fcn: 'queryByDescription',
 				args: [description]
 			};
@@ -336,7 +336,7 @@ module.exports = {
 			// queryAllCars chaincode function - requires no arguments , ex: args: [''],
 			const request = {
 				// targets : --- letting this default to the peers assigned to the channel
-				chaincodeId: 'fabcar',
+				chaincodeId: 'fabpart',
 				fcn: 'createPart',
 				args: []
 			};

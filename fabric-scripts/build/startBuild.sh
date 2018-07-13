@@ -8,7 +8,7 @@
 # NK - added clean up tasks
 docker rm -f $(docker ps -aq)
 docker network prune
-docker rmi dev-peer0.org1.example.com-fabcar-1.0-5c906e402ed29f20260ae42283216aa75549c571e2e380f3615826365d8269ba
+docker rmi dev-peer0.org1.example.com-fabpart-1.0-5c906e402ed29f20260ae42283216aa75549c571e2e380f3615826365d8269ba
 
 # Exit on first error
 set -e
@@ -18,7 +18,7 @@ set -e
 export MSYS_NO_PATHCONV=1
 starttime=$(date +%s)
 LANGUAGE=${1:-"node"}
-CC_SRC_PATH=/opt/gopath/src/github.com/fabcar/node
+CC_SRC_PATH=/opt/gopath/src/github.com/fabpart/node
 
 # clean the keystore
 rm -rf ./hfc-key-store
@@ -31,10 +31,10 @@ cd ./../basic-network
 # and prime the ledger with our 10 cars
 docker-compose -f ./docker-compose.yml up -d cli
 
-docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode install -n fabcar -v 1.0 -p "$CC_SRC_PATH" -l "$LANGUAGE"
-docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -n fabcar -l "$LANGUAGE" -v 1.0 -c '{"Args":[""]}' -P "OR ('Org1MSP.member','Org2MSP.member')"
+docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode install -n fabpart -v 1.0 -p "$CC_SRC_PATH" -l "$LANGUAGE"
+docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -n fabpart -l "$LANGUAGE" -v 1.0 -c '{"Args":[""]}' -P "OR ('Org1MSP.member','Org2MSP.member')"
 sleep 10
-docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode invoke -o orderer.example.com:7050 -C mychannel -n fabcar -c '{"function":"initLedger","Args":[""]}'
+docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode invoke -o orderer.example.com:7050 -C mychannel -n fabpart -c '{"function":"initLedger","Args":[""]}'
 
 printf "\nTotal setup execution time : $(($(date +%s) - starttime)) secs ...\n\n\n"
 printf "Start by installing required packages run 'npm install'\n"
